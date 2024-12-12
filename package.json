@@ -1,6 +1,6 @@
 {
   "name": "@konnorr/esbuild-plugin-lit-css",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A fork of <https://github.com/bennypowers/lit-css/blob/main/packages/esbuild-plugin-lit-css> for importing '.css' files as tagged template literals.",
   "main": "./exports/index.js",
   "module": "./exports/index.js",
