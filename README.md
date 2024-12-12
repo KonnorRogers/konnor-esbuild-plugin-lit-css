@@ -1,38 +1,156 @@
-# `@konnorr/esbuild-plugin-lit-css`
+> This is a fork of esbuild-plugin-lit-css which can be found here: <https://github.com/bennypowers/lit-css/tree/main/packages/esbuild-plugin-lit-css> because I found it was not working for me when the CSS imported
 
-## Documentation
+# @konnorr/esbuild-plugin-lit-css
 
-<https://konnorrogers.github.io/@konnorr/esbuild-plugin-lit-css>
+ESBuild plugin to import css files as JavaScript tagged-template literal objects.
 
-## Initial install
+> _The "Lit" stands for "Literal"_
 
-```bash
-mkdir -p my-project-name
-cd my-project-name
-git clone https://github.com/konnorrogers/npm-starter . --depth 1
-rm -rf .git
-git init
-pnpm install -D @web/test-runner @open-wc/testing-helpers @web/test-runner-playwright typescript rimraf @esm-bundle/chai playwright
-pnpm exec playwright install --with-deps
+You can use it to import CSS for various libraries like `lit-element`,
+`@microsoft/fast-element`, or others.
+
+## Do I Need This?
+
+No. This is an optional package who's sole purpose is to make it easier to write
+CSS-in-CSS while working on lit-element projects. You can just as easily write
+your CSS in some '`styles.css.js`' modules a la:
+
+```js
+import { css } from 'lit-element';
+export default css`:host { display: block; }`;
 ```
 
-## Renaming your package
+And this may actually be preferred.
 
-**THIS IS A DESTRUCTIVE ACTION THAT CANNOT BE UNDONE**
+Hopefully this package will become quickly obsolete when the [CSS Modules
+Proposal][modulesprop] (or something like it) is accepted and implemented.
 
-To rename your package, you can run the following command:
+In the mean time, enjoy importing your CSS into your component files.
 
-```bash
-npm run rename-package
+## Options
+
+| Name        | Accepts                                                                       | Default     |
+| ----------- | ----------------------------------------------------------------------------- | ----------- |
+| `filter`    | RegExp of file names to apply to                                              | `/\.css$/i` |
+| `cssnano`   | Boolean or Object of [cssnano][nanoopts] options.                             | `false`     |
+| `specifier` | Package to import `css` from                                                  | `lit`       |
+| `tag`       | Name of the template-tag function                                             | `css`       |
+| `transform` | Optional function (sync or async) which transforms css sources (e.g. postcss) | `x => x`    |
+
+## Usage
+
+```js
+import esbuild from 'esbuild';
+import { litCssPlugin } from 'esbuild-plugin-lit-css';
+
+await esbuild.build({
+  ...theRestOfYourConfig,
+  plugins: [
+    litCssPlugin(),
+  ],
+});
 ```
 
-Which will prompt you for a new name.
+Then import your CSS:
 
-## Structure
+```css
+:host {
+  display: block;
+}
 
-`exports/` is publicly available files
-`internal/` is...well...internal.
+h1 {
+  color: hotpink;
+}
+```
 
-`exports` and `internal` shouldn **NOT** write their own `.d.ts` that are co-located.
+```ts
+import { LitElement, customElement, html } from 'lit-element';
 
-`types/` is where you place your handwritten `.d.ts` files.
+import style from './css-in-css.css';
+
+@customElement('css-in-css')
+class CSSInCSS extends LitElement {
+  static get styles() {
+    return [style];
+  }
+
+  render() {
+    return html`<h1>It's Lit!</h1>`;
+  }
+}
+```
+
+### Usage with FAST
+
+```js
+plugins: [
+  litcss({ specifier: '@microsoft/fast-element' })
+]
+```
+
+```ts
+import { FASTElement, customElement, html } from '@microsoft/fast-element';
+
+import styles from './css-in-css.css';
+
+const template = html<CSSinCSS>`<h1>It's Lit!</h1>`;
+
+@customElement({ name: 'css-in-css', template, styles })
+class CSSinCSS extends FASTElement {}
+```
+
+### Usage with Sass, Less, PostCSS, etc.
+
+To load scss files:
+
+1. Specify the `filter` option to `litCssPlugin` to include scss files
+1. Define a `transform` function in the plugin options.
+
+```js
+// esbuild script
+import esbuild from 'esbuild';
+import Sass from 'sass';
+
+await esbuild.build({
+  entryPoints: [/*...*/],
+  plugins: [
+    litCssPlugin({
+      filter: /.scss$/,
+      transform: (data, { filePath }) =>
+        Sass.renderSync({ data, file: filePath })
+          .css.toString(),
+    }),
+  ]
+});
+```
+
+Similarly, to transform sources using PostCSS, specify a `transform` function:
+
+```js
+import esbuild from 'esbuild';
+import postcss from 'postcss';
+import postcssNesting from 'postcss-nesting';
+
+const processor = postcss(postcssNesting());
+
+await esbuild.build({
+  entryPoints: [/*...*/],
+  plugins: [
+    litCssPlugin({
+      transform: (css, { filePath }) =>
+        processor.process(css, { from: filePath })
+          .css,
+    }),
+  ]
+});
+```
+
+Looking for webpack? [lit-css-loader](../lit-css-loader)
+Looking for rollup? [rollup-plugin-lit-css](../rollup-plugin-lit-css)
+Looking for typescript? [typescript-transform-lit-css](../typescript-transform-lit-css)
+
+[wds]: https://modern-web.dev/docs/dev-server/
+[modulesprop]: https://github.com/w3c/webcomponents/issues/759
+[nanoopts]: https://cssnano.co/docs/config-file/#configuration-options
+
+
