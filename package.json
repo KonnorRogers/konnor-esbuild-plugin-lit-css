@@ -1,0 +1,52 @@
+{
+  "name": "@konnorr/esbuild-plugin-lit-css",
+  "version": "1.0.0",
+  "description": "A fork of <https://github.com/bennypowers/lit-css/blob/main/packages/esbuild-plugin-lit-css> for importing '.css' files as tagged template literals.",
+  "main": "./exports/index.js",
+  "module": "./exports/index.js",
+  "types": "./exports/index.d.ts",
+  "type": "module",
+  "files": [
+    "exports",
+    "internal",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "setup": "pnpm install",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf -g \"./{exports,internal}/**/*.d.ts\"",
+    "prepublish": "npm run build",
+    "deploy:patch": "npm version patch && npm publish && git push --follow-tags",
+    "deploy:minor": "npm version minor && npm publish && git push --follow-tags",
+    "deploy:major": "npm version major && npm publish && git push --follow-tags",
+    "publish:beta": "npm publish --tag=beta && git push --follow-tags"
+  },
+  "keywords": [
+    "esbuild",
+    "lit",
+    "css"
+  ],
+  "license": "MIT",
+  "repository": "git@github.com:KonnorRogers/@konnorr/esbuild-plugin-lit-css.git",
+  "bugs": {
+    "url": "https://github.com/KonnorRogers/@konnorr/esbuild-plugin-lit-css/issues"
+  },
+  "homepage": "https://github.com/KonnorRogers/@konnorr/esbuild-plugin-lit-css",
+  "author": "KonnorRogers <konnor5456@gmail.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@pwrs/lit-css": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@types/node": "^20.14.8",
+    "esbuild": ">=0.16.17 <0.24.0",
+    "lit": "^2.7.2 || ^3.0.0"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.7",
+    "typescript": "~5.5.2"
+  }
+}
