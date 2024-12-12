@@ -41,7 +41,7 @@ In the mean time, enjoy importing your CSS into your component files.
 
 ```js
 import esbuild from 'esbuild';
-import { litCssPlugin } from 'esbuild-plugin-lit-css';
+import { litCssPlugin } from '@konnorr/esbuild-plugin-lit-css';
 
 await esbuild.build({
   ...theRestOfYourConfig,
